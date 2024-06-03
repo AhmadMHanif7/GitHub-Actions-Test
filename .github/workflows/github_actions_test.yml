@@ -6,6 +6,7 @@ on:
       - main
   schedule:
     - cron: '0 * * * *'  # This will run the job every hour
+  workflow_dispatch:       # This allows the workflow to be manually triggered
 
 jobs:
   update-person-data:
@@ -14,6 +15,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
+        with:
+          persist-credentials: false  # Disables automatic token authentication
+
+      - name: Set up GitHub token
+        run: |
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
 
       - name: Set up Python
         uses: actions/setup-python@v2
@@ -37,6 +44,6 @@ jobs:
         run: |
           git add data/person_data.csv
           git commit -m 'Update person_data.csv'
-          git push
+          git push origin HEAD:main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
